@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,26 +15,30 @@ import android.view.View;
 public class Note extends View {
 
 	private Bitmap b_clear;
+	private Bitmap temp_image;
 	private Paint ink_color;
 	private Paint line_color;
-	private List<Integer> X_list;
-	private List<Integer> Y_list;
+	static private List<Integer> X_list;
+	static private List<Integer> Y_list;
 	private List<Integer> moving;
 	private int X_pos;
 	private int Y_pos;
+	private Context app_c = getContext();
 
 	public Note(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
+		
+		Globals.ink_c = -16777216;
 		X_list = new ArrayList<Integer>();
 		Y_list = new ArrayList<Integer>();
 		moving = new ArrayList<Integer>();
 		ink_color = new Paint();
 		ink_color.setAntiAlias(true);
-		ink_color.setColor(Color.rgb(0, 0, 0));
+
 		line_color = new Paint();
 		line_color.setAntiAlias(true);
-		line_color.setColor(Color.rgb(0, 0, 0));
+
 		line_color.setStrokeWidth(20);
 		b_clear = BitmapFactory.decodeResource(getResources(), R.drawable.clear);
 		
@@ -44,6 +48,18 @@ public class Note extends View {
 	protected void onDraw(Canvas canvas) {
 		// TODO Auto-generated method stub
 		super.onDraw(canvas);
+		
+		setDrawingCacheEnabled(true);
+		
+		line_color.setColor(Globals.ink_c);
+		ink_color.setColor(Globals.ink_c);
+
+		
+		if(temp_image != null)
+		{
+			canvas.drawBitmap(temp_image, 0, 0, null);
+		}
+		
 		int max = X_list.size();
 		if(max>1)
 		{
@@ -59,7 +75,11 @@ public class Note extends View {
 			}
 		}
 		
+		
+		
 		canvas.drawBitmap(b_clear, 10, 10, null);
+		canvas.drawRect(300, 10, 450, 50 , line_color);
+		
 	}
 
 	@Override
@@ -72,6 +92,7 @@ public class Note extends View {
 		
 		if(action == MotionEvent.ACTION_DOWN)
 		{
+			setDrawingCacheEnabled(true);
 			moving.add(1);
 			X_list.add(Xcord);
 			Y_list.add(Ycord);
@@ -81,10 +102,23 @@ public class Note extends View {
 		{
 			if(Xcord<b_clear.getWidth() && Ycord<b_clear.getHeight())
 			{
-				X_list.clear();
-				Y_list.clear();
-				moving.clear();
+				temp_image = null;
 			}
+			else if(Xcord>300 && Xcord<450 && Ycord>10 && Ycord<50)
+			{
+				Intent i = new Intent(app_c,Color_picker.class);
+				app_c.startActivity(i);
+			}
+			
+			
+			
+			buildDrawingCache();
+			
+			temp_image = Bitmap.createBitmap(getDrawingCache());
+			setDrawingCacheEnabled(false);
+			X_list.clear();
+			Y_list.clear();
+			moving.clear();
 			moving.add(1);
 			X_list.add(Xcord);
 			Y_list.add(Ycord);
@@ -100,7 +134,4 @@ public class Note extends View {
 		return true;
 	}
 	
-	
-	
-
 }
