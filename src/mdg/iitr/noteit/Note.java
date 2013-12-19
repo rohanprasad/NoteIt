@@ -2,6 +2,7 @@ package mdg.iitr.noteit;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable.Orientation;
+import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
@@ -24,6 +27,7 @@ public class Note extends View {
 
 	private Bitmap b_clear;
 	private Bitmap b_save;
+	private Bitmap bg_image;
 	private Bitmap temp_image;
 	private Paint ink_color;
 	private Paint line_color;
@@ -41,6 +45,15 @@ public class Note extends View {
 	public Note(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
+		
+		if(Globals.editing)
+		{
+			BitmapFactory.Options opt = new BitmapFactory.Options();
+			opt.inSampleSize = 4;
+			bg_image = BitmapFactory.decodeFile(Globals.uris.substring(5), opt );
+			Globals.editing = false;
+		}
+		
 		
 		Globals.ink_c = -16777216;
 		X_list = new ArrayList<Integer>();
@@ -82,6 +95,8 @@ public class Note extends View {
 		setDrawingCacheEnabled(true);
 		
 		canvas.drawRect(0, 0, scr_w , scr_h, bg_color);
+		if(bg_image != null)
+			canvas.drawBitmap(bg_image, 0, 0, null);
 		
 		line_color.setColor(Globals.ink_c);
 		ink_color.setColor(Globals.ink_c);
@@ -116,6 +131,8 @@ public class Note extends View {
 		{
 			canvas.drawRect(0, 0, scr_w, 60, bg_color);
 		}
+		
+		
 		
 	}
 
